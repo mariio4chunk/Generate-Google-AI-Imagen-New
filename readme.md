@@ -1,6 +1,6 @@
 <div align="center">
-  <h1>Generate Google AI Imagen - New Generation</h1>
-  <p>Pembuat Prompt AI Modern untuk Gambar Impian Anda</p>
+  <h1>✨ Generate Google AI Imagen - New Generation</h1>
+  <p>👾 Pembuat Prompt AI Modern untuk Gambar Impian Anda</p>
   
   <div>
     <img src="https://img.shields.io/badge/Powered_by-Google_Gemini_1.5-4285F4?style=for-the-badge&labelColor=222222" alt="Powered by Google Gemini 1.5">
