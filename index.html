@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Image Prompt Generator (Final Design)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f0f4f8; /* Softer, slightly blueish background for depth */
+        }
+        .fade-in {
+            animation: fadeIn 0.5s ease-in-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .form-label {
+            @apply block text-sm font-semibold text-slate-700 mb-2;
+        }
+        .form-input, .form-textarea, .form-select {
+            /* Rounded corners, clear borders, and better focus state */
+            @apply w-full bg-white border-2 border-slate-200 rounded-xl p-3 text-slate-800 placeholder-slate-400 focus:bg-white focus:ring-4 focus:ring-indigo-500/20 focus:border-indigo-500 transition duration-200 ease-in-out;
+        }
+        .spinner {
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        /* Custom class for AI suggestion buttons */
+        .ai-button {
+             @apply flex items-center gap-2 text-sm bg-indigo-100 text-indigo-700 font-semibold py-2 px-3 rounded-lg hover:bg-indigo-200 transition-colors disabled:bg-slate-200 disabled:text-slate-500 disabled:cursor-not-allowed;
+        }
+    </style>
+</head>
+<body class="text-slate-800 antialiased">
+
+    <div class="container mx-auto p-4 sm:p-6 max-w-6xl">
+        
+        <header class="text-center mb-10">
+            <h1 class="text-3xl sm:text-4xl font-extrabold text-slate-900 tracking-tight">AI Image Prompt Generator</h1>
+            <p class="mt-3 text-base text-slate-600 max-w-2xl mx-auto">Ciptakan prompt gambar profesional dengan asisten AI canggih untuk hasil yang menakjubkan.</p>
+        </header>
+
+        <!-- Main Card with new design: more rounded, more shadow -->
+        <div class="bg-white p-6 sm:p-8 rounded-3xl shadow-2xl shadow-slate-200">
+            <!-- Main Grid Layout: 2 columns on desktop -->
+            <div class="grid grid-cols-1 lg:grid-cols-5 gap-x-10 gap-y-8">
+
+                <!-- Left Column: Main Inputs -->
+                <div class="lg:col-span-3 space-y-8">
+                    <!-- Section 1: Core Subject -->
+                    <div>
+                        <div class="flex justify-between items-center mb-6">
+                            <h3 class="text-lg font-bold text-slate-800">1. Detail Utama</h3>
+                            <button id="geminiBtn" class="ai-button" title="Kembangkan ide atau dapatkan inspirasi dari AI">
+                                <span id="geminiIcon">✨</span>
+                                <span id="geminiLoader" class="hidden spinner h-4 w-4 border-2 border-current border-t-transparent rounded-full"></span>
+                                <span>Kembangkan Ide</span>
+                            </button>
+                        </div>
+                        <div class="space-y-5">
+                            <div>
+                                <label for="subject" class="form-label">Subjek Utama</label>
+                                <input type="text" id="subject" class="form-input" placeholder="Contoh: Seekor naga kristal raksasa">
+                            </div>
+                            <div>
+                                <label for="detail" class="form-label">Aksi / Detail Spesifik</label>
+                                <input type="text" id="detail" class="form-input" placeholder="Contoh: sedang tidur di atas tumpukan emas">
+                            </div>
+                            <div>
+                                <label for="setting" class="form-label">Latar / Setting</label>
+                                <input type="text" id="setting" class="form-input" placeholder="Contoh: di dalam gua vulkanik yang bercahaya">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Section 2: Style & Technical Details -->
+                    <div>
+                        <div class="flex justify-between items-center mb-6">
+                           <h3 class="text-lg font-bold text-slate-800">2. Gaya & Teknis</h3>
+                           <button id="styleGeminiBtn" class="ai-button" title="Dapatkan saran gaya dari AI berdasarkan ide Anda">
+                               <span id="styleGeminiIcon">✨</span>
+                               <span id="styleGeminiLoader" class="hidden spinner h-4 w-4 border-2 border-current border-t-transparent rounded-full"></span>
+                               <span>Gaya Otomatis</span>
+                           </button>
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-5">
+                            <div>
+                                <label for="style" class="form-label">Gaya Visual</label>
+                                <select id="style" class="form-select">
+                                    <option value="">-- Pilih Gaya --</option>
+                                    <option value="photorealistic">Photorealistic</option>
+                                    <option value="digital painting">Digital Painting</option>
+                                    <option value="3d render">3D Render</option>
+                                    <option value="fantasy art">Fantasy Art</option>
+                                    <option value="anime style">Anime Style</option>
+                                    <option value="cyberpunk">Cyberpunk</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label for="lighting" class="form-label">Pencahayaan</label>
+                                <select id="lighting" class="form-select">
+                                    <option value="">-- Pilih Pencahayaan --</option>
+                                    <option value="cinematic lighting">Cinematic Lighting</option>
+                                    <option value="dramatic lighting">Dramatic Lighting</option>
+                                    <option value="golden hour">Golden Hour</option>
+                                    <option value="soft light">Soft Light</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label for="composition" class="form-label">Komposisi</label>
+                                <select id="composition" class="form-select">
+                                    <option value="">-- Pilih Komposisi --</option>
+                                    <option value="wide angle shot">Wide Angle Shot</option>
+                                    <option value="close-up shot">Close-up Shot</option>
+                                    <option value="bird's-eye view">Bird's-eye View</option>
+                                    <option value="low angle shot">Low Angle Shot</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label for="quality" class="form-label">Kualitas & Detail</label>
+                                <select id="quality" class="form-select">
+                                    <option value="masterpiece, best quality, highly detailed, 8k, sharp focus">Ultra High Quality (8K)</option>
+                                    <option value="high quality, detailed, 4k">High Quality (4K)</option>
+                                    <option value="rendered in Unreal Engine 5">Unreal Engine 5</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right Column: Negative Prompt & Generation -->
+                <div class="lg:col-span-2 flex flex-col">
+                     <div>
+                        <div class="flex justify-between items-center mb-6">
+                           <h3 class="text-lg font-bold text-slate-800">3. Prompt Negatif</h3>
+                           <button id="negativeGeminiBtn" class="ai-button" title="Dapatkan saran hal yang perlu dihindari dari AI">
+                               <span id="negativeGeminiIcon">✨</span>
+                               <span id="negativeGeminiLoader" class="hidden spinner h-4 w-4 border-2 border-current border-t-transparent rounded-full"></span>
+                               <span>Saran Cerdas</span>
+                           </button>
+                        </div>
+                        <label for="negativePrompt" class="form-label">Hal yang ingin dihindari</label>
+                        <textarea id="negativePrompt" rows="8" class="form-textarea h-full" placeholder="Contoh: blurry, bad anatomy, watermark...">ugly, deformed, noisy, blurry, low contrast, text, signature, watermark, extra limbs, bad anatomy, fused fingers, too many fingers, long neck</textarea>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Generate Button & Output Section -->
+            <div class="mt-10 pt-8 border-t-2 border-slate-100">
+                <div class="text-center mb-6">
+                    <button id="generateBtn" class="bg-indigo-600 text-white font-bold py-4 px-10 rounded-xl hover:bg-indigo-700 focus:outline-none focus:ring-4 focus:ring-indigo-500/50 transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl shadow-indigo-200">
+                        Buat Prompt Final
+                    </button>
+                </div>
+                
+                <div id="outputSection" class="hidden fade-in bg-slate-50 p-4 rounded-2xl border border-slate-200">
+                    <h2 class="text-base font-bold text-slate-800 mb-3 text-center">✅ Prompt Final (Siap Pakai)</h2>
+                    <div class="relative bg-white p-4 rounded-xl border-2 border-dashed border-slate-300">
+                        <p id="finalPromptOutput" class="text-slate-700 pr-12 break-words text-base"></p>
+                        <button id="copyBtn" class="absolute top-1/2 right-3 -translate-y-1/2 p-2 bg-slate-200 rounded-lg hover:bg-slate-300 transition-colors" title="Salin Prompt Final">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" viewBox="0 0 16 16"><path d="M4 1.5H3a2 2 0 0 0-2 2V14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V3.5a2 2 0 0 0-2-2h-1v1h1a1 1 0 0 1 1 1V14a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V3.5a1 1 0 0 1 1-1h1v-1z"/><path d="M9.5 1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-3a.5.5 0 0 1-.5-.5v-1a.5.5 0 0 1 .5-.5h3zm-3-1A1.5 1.5 0 0 0 5 1.5v1A1.5 1.5 0 0 0 6.5 4h3A1.5 1.5 0 0 0 11 2.5v-1A1.5 1.5 0 0 0 9.5 0h-3z"/></svg>
+                        </button>
+                        <div id="copyFeedback" class="absolute top-1/2 right-3 -translate-y-1/2 px-3 py-2 bg-green-500 text-white text-sm font-medium rounded-lg hidden">Tersalin!</div>
+                    </div>
+                    <p class="text-xs text-slate-500 mt-2 text-center">Prompt negatif sudah otomatis digabung dengan format `--no`.</p>
+                </div>
+            </div>
+        </div>
+        
+        <div id="errorBox" class="hidden fixed bottom-5 right-5 bg-red-600 text-white py-3 px-5 rounded-xl shadow-xl fade-in">
+            <p id="errorMessage"></p>
+        </div>
+
+        <footer class="text-center mt-12 text-sm text-slate-500">
+            <p>Ditenagai oleh Gemini 1.5 Flash ✨ Dibuat dengan ❤️ untuk para kreator.</p>
+        </footer>
+    </div>
+
+    <script>
+        // --- DOM Element Selection ---
+        const subjectInput = document.getElementById('subject');
+        const detailInput = document.getElementById('detail');
+        const settingInput = document.getElementById('setting');
+        const styleSelect = document.getElementById('style');
+        const lightingSelect = document.getElementById('lighting');
+        const compositionSelect = document.getElementById('composition');
+        const qualitySelect = document.getElementById('quality');
+        const negativePromptInput = document.getElementById('negativePrompt');
+
+        // Buttons
+        const generateBtn = document.getElementById('generateBtn');
+        const geminiBtn = document.getElementById('geminiBtn');
+        const styleGeminiBtn = document.getElementById('styleGeminiBtn');
+        const negativeGeminiBtn = document.getElementById('negativeGeminiBtn');
+        const copyBtn = document.getElementById('copyBtn');
+
+        // Loaders & Icons
+        const geminiIcon = document.getElementById('geminiIcon');
+        const geminiLoader = document.getElementById('geminiLoader');
+        const styleGeminiIcon = document.getElementById('styleGeminiIcon');
+        const styleGeminiLoader = document.getElementById('styleGeminiLoader');
+        const negativeGeminiIcon = document.getElementById('negativeGeminiIcon');
+        const negativeGeminiLoader = document.getElementById('negativeGeminiLoader');
+
+        // Output & Feedback
+        const outputSection = document.getElementById('outputSection');
+        const finalPromptOutput = document.getElementById('finalPromptOutput');
+        const copyFeedback = document.getElementById('copyFeedback');
+        const errorBox = document.getElementById('errorBox');
+        const errorMessage = document.getElementById('errorMessage');
+
+        // --- Helper Functions ---
+        function showError(message) {
+            errorMessage.textContent = message;
+            errorBox.classList.remove('hidden');
+            setTimeout(() => { errorBox.classList.add('hidden'); }, 4000);
+        }
+
+        function toggleLoader(button, icon, loader, isLoading) {
+            button.disabled = isLoading;
+            icon.classList.toggle('hidden', isLoading);
+            loader.classList.toggle('hidden', !isLoading);
+        }
+
+        // --- Generic Gemini API Caller ---
+        async function callGemini(prompt, schema) {
+            const payload = {
+                contents: [{ role: "user", parts: [{ text: prompt }] }],
+                generationConfig: {
+                    responseMimeType: "application/json",
+                    responseSchema: schema
+                }
+            };
+            // CONTOH API KEY: Kunci API ini hanya untuk contoh.
+            // Ganti dengan kunci API asli Anda untuk menjalankan aplikasi.
+            const apiKey = "AIzaSyCyiQa-hKK8bVeYKbg7F35GU_7aGooosgE"; 
+            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${apiKey}`;
+
+            const response = await fetch(apiUrl, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+
+            if (!response.ok) {
+                const errorBody = await response.json();
+                console.error("API Error Response:", errorBody);
+                const errorMsg = errorBody.error?.message || "Terjadi kesalahan pada API.";
+                throw new Error(errorMsg);
+            }
+
+            const result = await response.json();
+
+            if (result.candidates?.[0]?.content?.parts?.[0]?.text) {
+                return JSON.parse(result.candidates[0].content.parts[0].text);
+            } else {
+                console.error("Invalid API Response Structure:", result);
+                throw new Error("Respons AI tidak valid atau kosong.");
+            }
+        }
+
+        // --- AI Feature 1: Idea Development ---
+        geminiBtn.addEventListener('click', async () => {
+            toggleLoader(geminiBtn, geminiIcon, geminiLoader, true);
+            const userIdea = subjectInput.value.trim();
+            const prompt = userIdea 
+                ? `Expand this simple idea into a detailed image concept: "${userIdea}". Provide a creative subject, a specific action, and a compelling setting.`
+                : `Generate a single, random, creative, and visually interesting concept for an image. Provide a subject, a specific action, and a compelling setting.`;
+            
+            const schema = { type: "OBJECT", properties: { "subject": { "type": "STRING" }, "detail": { "type": "STRING" }, "setting": { "type": "STRING" } }, required: ["subject", "detail", "setting"] };
+
+            try {
+                const res = await callGemini(prompt, schema);
+                subjectInput.value = res.subject || '';
+                detailInput.value = res.detail || '';
+                settingInput.value = res.setting || '';
+            } catch (error) {
+                console.error("Gemini Idea Error:", error);
+                showError(`Gagal mendapatkan ide: ${error.message}`);
+            } finally {
+                toggleLoader(geminiBtn, geminiIcon, geminiLoader, false);
+            }
+        });
+
+        // --- AI Feature 2: Auto Style ---
+        styleGeminiBtn.addEventListener('click', async () => {
+            const concept = [subjectInput.value, detailInput.value, settingInput.value].filter(Boolean).join(', ');
+            if (!concept) {
+                showError("Isi 'Detail Utama' dulu untuk dapat saran gaya.");
+                return;
+            }
+            toggleLoader(styleGeminiBtn, styleGeminiIcon, styleGeminiLoader, true);
+            const prompt = `For the image concept "${concept}", suggest the best artistic style. Pick one value for each field from the available options.`;
+            const schema = { type: "OBJECT", properties: { "style": { "type": "STRING" }, "lighting": { "type": "STRING" }, "composition": { "type": "STRING" } }, required: ["style", "lighting", "composition"] };
+            
+            try {
+                const res = await callGemini(prompt, schema);
+                const setSelectValue = (select, value) => { if (value && Array.from(select.options).some(opt => opt.value === value.toLowerCase().replace(/_/g, ' '))) { select.value = value.toLowerCase().replace(/_/g, ' '); } };
+                setSelectValue(styleSelect, res.style);
+                setSelectValue(lightingSelect, res.lighting);
+                setSelectValue(compositionSelect, res.composition);
+            } catch (error) {
+                console.error("Gemini Style Error:", error);
+                showError(`Gagal dapat saran gaya: ${error.message}`);
+            } finally {
+                toggleLoader(styleGeminiBtn, styleGeminiIcon, styleGeminiLoader, false);
+            }
+        });
+        
+        // --- AI Feature 3: Negative Prompt Suggestion ---
+        negativeGeminiBtn.addEventListener('click', async () => {
+             const concept = [subjectInput.value, detailInput.value, settingInput.value].filter(Boolean).join(', ');
+            if (!concept) {
+                showError("Isi 'Detail Utama' dulu untuk dapat saran negatif.");
+                return;
+            }
+            toggleLoader(negativeGeminiBtn, negativeGeminiIcon, negativeGeminiLoader, true);
+            const prompt = `Based on the image concept "${concept}", list the most important negative keywords to avoid common AI image generation issues like bad anatomy, blurriness, or weird artifacts. The output should be a single string of comma-separated keywords.`;
+            const schema = { type: "OBJECT", properties: { "negative_keywords": { "type": "STRING" } }, r
