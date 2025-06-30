@@ -1,0 +1,21 @@
+body {
+  font-family: 'Inter', sans-serif;
+}
+.beautiful-bg {
+  background: linear-gradient(120deg, #f0e7ff 0%, #fef6fb 40%, #f3f3ff 100%);
+  min-height: 100vh;
+}
+.spinner {
+  animation: spin 1s linear infinite;
+}
+@keyframes spin {
+  from {transform: rotate(0deg);}
+  to {transform: rotate(360deg);}
+}
+.fade-in {
+  animation: fadeIn .7s cubic-bezier(.4,0,.2,1);
+}
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(12px);}
+  to { opacity: 1; transform: translateY(0);}
+}
